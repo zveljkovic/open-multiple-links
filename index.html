@@ -94,19 +94,40 @@
             background: #002bff;
         }
         #share {float: right}
+
+        #clipboard-notice {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            transition: opacity 1s;
+            padding: 20px;
+            background: #c4ffac;
+            border-radius: 30px;
+        }
+        #clipboard-notice.visible {
+            opacity: 0.8;
+            visibility: visible;
+        }
     </style>
 </head>
 
 <body>
     <div id="wrapper">
         <h1>Open multiple links</h1>
+        <p>Please verify that you have allowed opening popups from this site.</p>
         <textarea id="text" placeholder="Paste each link on separate line"></textarea>
         <button id="open">Open</button>
         <button id="share">Share</button>
+        <div id="clipboard-notice">Successfully copied to clipboard</div>
         <div id="ad"></div>
     </div>
     <script>
-        var elText = document.getElementById('text');
+        const elText = document.getElementById('text');
+        const elClipboardNotice = document.getElementById('clipboard-notice');
+
         const urlParams = new URLSearchParams(window.location.search);
         const links = urlParams.getAll('links[]');
         let startText = '';
@@ -115,7 +136,6 @@
         }
         elText.value = startText;
         elText.oninput = function (event) {
-            console.log(event, 'Text changed to ' +  elText.value);
             const linksQS = elText.value
                 .split('\n')
                 .filter(function (line){
@@ -125,6 +145,32 @@
                 }).join('&');
             window.history.replaceState(null, null, window.location.origin + window.location.pathname + '?'+linksQS);
         }
+        const openTabs = function () {
+            const links = elText.value
+                .split('\n')
+                .filter(function (line){
+                    return line.trim() !== ''
+                });
+            links.forEach(function (link){
+                window.open(link, '_blank');
+            })
+
+            // links.forEach(function (link){
+            //     setTimeout(function() {
+            //         const tab = window.open('about:blank');
+            //         tab.location = link;
+            //     }, 100);
+            // })
+        }
+        document.getElementById('open').onclick = openTabs;
+        const share = function() {
+            navigator.clipboard.writeText(window.location.toString());
+            elClipboardNotice.classList.add('visible');
+            setTimeout(function () {
+                elClipboardNotice.classList.remove('visible');
+            }, 3000);
+        }
+        document.getElementById('share').onclick = share;
     </script>
 </body>
 </html>
