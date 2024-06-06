@@ -1,0 +1,130 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Open Multiple Links</title>
+    <meta name="description" content="Simple helper to open and share multiple links">
+    <meta name="author" content="Zlatibor Veljkovic">
+
+    <meta property="og:title" content="Open Multiple Links">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://open-multiple-links.com/">
+    <meta property="og:description" content="Simple helper to open and share multiple links">
+    <meta property="og:image" content="logo.jpg">
+
+    <link rel="icon" href="/favicon.ico">
+    <style>
+        #wrapper {
+            width: 80vw;
+            margin: 0 auto;
+        }
+        h1 {text-align: center; color: #444444}
+
+        #text {
+            width: 100%;
+            height: 50vh;
+            display: block;
+            margin-bottom: 16px;
+            border: 1px solid #cacaca;
+        }
+
+        @keyframes glowing-button-85 {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        #open, #share {
+           padding: 0.6em 2em;
+           border: none;
+           outline: none;
+           color: rgb(255, 255, 255);
+           background: #111;
+           cursor: pointer;
+           position: relative;
+           z-index: 0;
+           border-radius: 10px;
+           user-select: none;
+           -webkit-user-select: none;
+           touch-action: manipulation;
+       }
+
+        #open:before, #share:before {
+            content: "";
+            background: linear-gradient(
+                    45deg,
+                    #ff0000,
+                    #ff7300,
+                    #fffb00,
+                    #48ff00,
+                    #00ffd5,
+                    #002bff,
+                    #7a00ff,
+                    #ff00c8,
+                    #ff0000
+            );
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            -webkit-filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowing-button-85 20s linear infinite;
+            transition: opacity 0.3s ease-in-out;
+            border-radius: 10px;
+        }
+
+
+        #open:after, #share:after {
+            z-index: -1;
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #222;
+            left: 0;
+            top: 0;
+            border-radius: 10px;
+        }
+        #share:after {
+            background: #002bff;
+        }
+        #share {float: right}
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <h1>Open multiple links</h1>
+        <textarea id="text" placeholder="Paste each link on separate line"></textarea>
+        <button id="open">Open</button>
+        <button id="share">Share</button>
+        <div id="ad"></div>
+    </div>
+    <script>
+        var elText = document.getElementById('text');
+        const urlParams = new URLSearchParams(window.location.search);
+        const links = urlParams.getAll('links[]');
+        let startText = '';
+        for (const l of links) {
+            startText += l + '\r\n';
+        }
+        elText.value = startText;
+        elText.oninput = function (event) {
+            console.log(event, 'Text changed to ' +  elText.value);
+            const linksQS = elText.value
+                .split('\n')
+                .filter(function (line){
+                   return line.trim() !== ''
+                }).map(function(line){
+                    return 'links[]=' + encodeURIComponent(line);
+                }).join('&');
+            window.history.replaceState(null, null, window.location.origin + window.location.pathname + '?'+linksQS);
+        }
+    </script>
+</body>
+</html>
