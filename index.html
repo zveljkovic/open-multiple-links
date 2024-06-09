@@ -1,12 +1,19 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSQCGSBRLH"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag() { dataLayer.push(arguments); }
+        gtag('consent', 'default', {
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'ad_storage': 'denied',
+            'analytics_storage': 'denied',
+            'wait_for_update': 500,
+        });
         gtag('js', new Date());
-
         gtag('config', 'G-HSQCGSBRLH');
     </script>
 
@@ -121,6 +128,64 @@
             opacity: 0.8;
             visibility: visible;
         }
+
+        #consent-dialog {
+            background-color: #ffffff;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        #consent-dialog.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #consent-dialog h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #consent-dialog p {
+            margin-bottom: 15px;
+        }
+
+        #consent-dialog label {
+            display: block;
+        }
+
+        #consent-dialog input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        #consent-dialog button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #consent-dialog #allow-all {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #consent-dialog #continue {
+            background-color: #008CBA;
+            color: white;
+        }
+
+        #consent-dialog button:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 
@@ -134,6 +199,77 @@
         <div id="clipboard-notice">Successfully copied to clipboard</div>
         <div id="ad"></div>
     </div>
+
+    <div id="consent-dialog">
+        <h1>Consents</h1>
+        <p><label for="ad_storage"><input id="ad_storage" type="checkbox" /><b>Ad Storage</b> Enables storage (such as cookies) related to advertising.</label></p>
+        <p><label for="ad_user_data"><input id="ad_user_data" type="checkbox" /><b>Ad User Data</b> Sets consent for sending user data related to advertising to Google.</label></p>
+        <p><label for="ad_personalization"><input id="ad_personalization" type="checkbox" /><b>Ad Personalization</b> Sets consent for personalized advertising.</label></p>
+        <p><label for="analytics_storage"><input id="analytics_storage" type="checkbox" /><b>Analytics Storage</b> Enables storage (such as cookies) related to analytics e.g. visit duration.</label></p>
+<!--        <p><label for="functionality_storage"><input id="functionality_storage" type="checkbox" /><b>Functionality Storage</b> Enables storage that supports the functionality of the website or app such as language settings.</label></p>-->
+<!--        <p><label for="personalization_storage"><input id="personalization_storage" type="checkbox" /><b>Personalization Storage</b> Enables storage related to personalization e.g. video recommendations.</label></p>-->
+<!--        <p><label for="security_storage"><input id="security_storage" type="checkbox" /><b>Security Storage</b> Enables storage related to security such as authentication functionality, fraud prevention, and other user protection.</label></p>-->
+        <button id="allow-all">Allow all</button>
+        <button id="continue">Continue</button>
+    </div>
+    <script>
+        const consentCheck = function () {
+            const consentDialogShown = localStorage.getItem('consentDialogShown');
+            if (consentDialogShown === 'true') {
+                gtag('consent', 'update', {
+                    ad_user_data: localStorage.getItem("adUserData"),
+                    ad_personalization: localStorage.getItem("adPersonalization"),
+                    ad_storage: localStorage.getItem("adStorage"),
+                    analytics_storage: localStorage.getItem("analyticsStorage"),
+                });
+                return;
+            }
+            document.getElementById('consent-dialog').classList.add('visible')
+
+            const elConsentContinue = document.getElementById('continue');
+            const elConsentAllowAll = document.getElementById('allow-all');
+            const consentDone = function () {
+                const adUserData = document.getElementById('ad_user_data').checked ? 'granted' : 'denied';
+                const adPersonalization = document.getElementById('ad_personalization').checked ? 'granted' : 'denied';
+                const adStorage = document.getElementById('ad_storage').checked ? 'granted' : 'denied';
+                const analyticsStorage = document.getElementById('analytics_storage').checked ? 'granted' : 'denied';
+                localStorage.setItem("consentDialogShown", "true");
+                localStorage.setItem("adUserData", adUserData);
+                localStorage.setItem("adPersonalization", adPersonalization);
+                localStorage.setItem("adStorage", adStorage);
+                localStorage.setItem("analyticsStorage", analyticsStorage);
+
+                function gtag() { dataLayer.push(arguments); }
+
+                gtag('consent', 'update', {
+                    ad_user_data: adUserData,
+                    ad_personalization: document.getElementById('ad_personalization').checked ? 'granted' : 'denied',
+                    ad_storage: document.getElementById('ad_storage').checked ? 'granted' : 'denied',
+                    analytics_storage: document.getElementById('analytics_storage').checked ? 'granted' : 'denied',
+                });
+
+                document.getElementById('consent-dialog').style.display = 'none';
+
+                // Load gtag.js script.
+                var gtagScript = document.createElement('script');
+                gtagScript.async = true;
+                gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-HSQCGSBRLH';
+
+                var firstScript = document.getElementsByTagName('script')[0];
+                firstScript.parentNode.insertBefore(gtagScript,firstScript);
+            }
+            elConsentContinue.onclick = consentDone;
+            elConsentAllowAll.onclick = function (){
+                debugger;
+                document.getElementById('ad_user_data').checked = true;
+                document.getElementById('ad_personalization').checked = true;
+                document.getElementById('ad_storage').checked = true;
+                document.getElementById('analytics_storage').checked = true;
+                consentDone();
+            };
+        }
+        consentCheck();
+    </script>
     <script>
         const elText = document.getElementById('text');
         const elClipboardNotice = document.getElementById('clipboard-notice');
@@ -174,6 +310,9 @@
             }, 3000);
         }
         document.getElementById('share').onclick = share;
+    </script>
+    <script>
+
     </script>
 </body>
 </html>
