@@ -7,7 +7,4 @@ Deployable through Docker or native through web server.
 Zero dependencies 
 
 
-
-
-<img width="1201" height="558" alt="open-multiple-links" src="https://github.com/user-attachments/assets/9735cdad-4fa6-4070-b4b8-7de63d2b4bb0" />
-
+![Open Multiple Links screenshot](open-multiple-links.png)
